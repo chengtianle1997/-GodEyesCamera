@@ -1,0 +1,2 @@
+# GodEyesCamera
+The back-end application for Cameras, including drivers for HikVision Cameras, OpenCV, FFmpeg. This program runs on Windows 10 platform. You should install these dependencies first before compiling and running the program.
