@@ -1190,32 +1190,28 @@ void AcqImageThread()
 					//printf("brightness:%f", AverPic[0]);
 
 					//Classify the picture according to the beat
-					if (AverPic[0] > sep)
+					if ((AverPic[0] > sep && EncodeEnable) || (!CalEnable && EncodeEnable))
 					{
-						if (EncodeEnable)
-						{
-							//时间戳标注
-							Mat matImage{
-								cvSize(ImageWidth,ImageHeight),
-								CV_8UC1,
-								Buffer0
-							};
-							char* timestamp = new char[50];
-							sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer0Time.wYear, Buffer0Time.wMonth, Buffer0Time.wDay, Buffer0Time.wHour, Buffer0Time.wMinute, Buffer0Time.wSecond, Buffer0Time.wMilliseconds);
-							//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
-							int TimeinMilliSeconds = Buffer0Time.wHour * 60 * 60 * 1000 + Buffer0Time.wMinute * 60 * 1000 + Buffer0Time.wSecond * 1000 + Buffer0Time.wMilliseconds;
-							mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
-							EncodeRecordNum++;
+						//时间戳标注
+						Mat matImage{
+							cvSize(ImageWidth,ImageHeight),
+							CV_8UC1,
+							Buffer0
+						};
+						char* timestamp = new char[50];
+						sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer0Time.wYear, Buffer0Time.wMonth, Buffer0Time.wDay, Buffer0Time.wHour, Buffer0Time.wMinute, Buffer0Time.wSecond, Buffer0Time.wMilliseconds);
+						//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
+						int TimeinMilliSeconds = Buffer0Time.wHour * 60 * 60 * 1000 + Buffer0Time.wMinute * 60 * 1000 + Buffer0Time.wSecond * 1000 + Buffer0Time.wMilliseconds;
+						mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
+						EncodeRecordNum++;
 
-							putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
-							memcpy(Buffer0, matImage.data, SizeofPixels);
+						putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+						memcpy(Buffer0, matImage.data, SizeofPixels);
 
-							delete []timestamp;
-							CodeState0 = 1;
-							GetImage0 = 0;
-							CalEnd0 = 1;
-						}
-
+						delete []timestamp;
+						CodeState0 = 1;
+						GetImage0 = 0;
+						CalEnd0 = 1;
 					}
 					else
 					{
@@ -1250,31 +1246,29 @@ void AcqImageThread()
 
 					cv::Scalar AverPic = cv::mean(RoiImage);
 
-					if (AverPic[0] > sep)
+					if ((AverPic[0] > sep && EncodeEnable) || (!CalEnable && EncodeEnable))
 					{
-						if (EncodeEnable)
-						{
-							//时间戳标注
-							Mat matImage{
-								cvSize(ImageWidth,ImageHeight),
-								CV_8UC1,
-								Buffer1
-							};
-							char* timestamp = new char[50];
-							sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer1Time.wYear, Buffer1Time.wMonth, Buffer1Time.wDay, Buffer1Time.wHour, Buffer1Time.wMinute, Buffer1Time.wSecond, Buffer1Time.wMilliseconds);
-							//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
-							int TimeinMilliSeconds = Buffer1Time.wHour * 60 * 60 * 1000 + Buffer1Time.wMinute * 60 * 1000 + Buffer1Time.wSecond * 1000 + Buffer1Time.wMilliseconds;
-							mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
-							EncodeRecordNum++;
+						
+						//时间戳标注
+						Mat matImage{
+							cvSize(ImageWidth,ImageHeight),
+							CV_8UC1,
+							Buffer1
+						};
+						char* timestamp = new char[50];
+						sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer1Time.wYear, Buffer1Time.wMonth, Buffer1Time.wDay, Buffer1Time.wHour, Buffer1Time.wMinute, Buffer1Time.wSecond, Buffer1Time.wMilliseconds);
+						//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
+						int TimeinMilliSeconds = Buffer1Time.wHour * 60 * 60 * 1000 + Buffer1Time.wMinute * 60 * 1000 + Buffer1Time.wSecond * 1000 + Buffer1Time.wMilliseconds;
+						mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
+						EncodeRecordNum++;
 
-							putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
-							memcpy(Buffer1, matImage.data, SizeofPixels);
+						putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+						memcpy(Buffer1, matImage.data, SizeofPixels);
 							
-							delete []timestamp;
-							CodeState1 = 1;
-							GetImage1 = 0;
-							CalEnd1 = 1;
-						}
+						delete []timestamp;
+						CodeState1 = 1;
+						GetImage1 = 0;
+						CalEnd1 = 1;
 					}
 					else
 					{
