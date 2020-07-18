@@ -1737,7 +1737,14 @@ int main(int argc,char* argv[])
 		break;
 		case 9:
 		{
-			;
+			//Designed for EncCam(Test)  Acq + Enc (Without Sending);
+			CalEnable = 1;
+			EncodeEnable = 1;
+			EnableSendData = 1;
+			//Image Transition
+			EnableCSSend = 0;
+			//Data Trasition
+			EnableDSSend = 0;
 		}
 		break;
 		case 10:
