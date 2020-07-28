@@ -1,5 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+// Define the way to calculate center
+//#define GAUSS_CENTER
+#define WEIGHT_CENTER
+
 #include "GaussCal.h"
 //#include "conio.h"
 
@@ -146,6 +150,121 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 //	int Cols = cloneImage.cols;//x
 //	int Rows = cloneImage.rows;//y
 
+#ifdef WEIGHT_CENTER
+	//逐行存储所有点的x坐标和亮度值以便分析 在此只存入高斯点
+#pragma omp parallel for num_threads(guasscalparam.threads)
+	for (int i = 0; i < Rows; i++) {
+		int PixelData;
+		int Pixnum = 0;
+		GPoint* gpoint;
+		gpoint = new GPoint[Rows];
+		Pixnum = 0;
+		//高斯点选取 
+		//watch.restart();
+		guasscalparam.xRange = 10;
+		guasscalparam.minError = 0.6;
+		uchar* data = guasscalparam.matImage.ptr<uchar>(i);
+		for (int j = guasscalparam.point[i].x - guasscalparam.xRange; j <= guasscalparam.point[i].x + guasscalparam.xRange; j++) {
+			PixelData = data[j];
+			//cout << PixelData << endl;
+			//minerror和maxerror条件筛选高斯点  //后期在此处考虑xRange
+			//cout << "condition1" << (PixelData > minError*brightness[i]) << endl;
+			//cout << "condition2" << (PixelData < ((1 - maxError)*brightness[i]))<<endl;
+			//cout << "condition3" << (abs(j - point[i].x) < xRange) << endl;
+
+			if (PixelData > guasscalparam.minError * guasscalparam.point[i].brightness) {
+				gpoint[Pixnum].x = j;
+				gpoint[Pixnum].brightness = PixelData;
+				Pixnum++;
+			}
+			/*if ((j - point[i].x) > xRange)
+				break;*/
+		}
+		//watch.stop();
+		//cout << "高斯点选取耗时:" << watch.elapsed() << endl;
+		if (Pixnum > 0) {
+			int n = Pixnum;
+			
+			//结果计算
+			//watch.restart();
+			float sum_num = 0, sum_pos = 0;
+			for (int m = 0; m < n; m++)
+			{
+				sum_num += gpoint[m].x * gpoint[m].brightness;
+				sum_pos += gpoint[m].brightness;
+			}
+			
+			guasscalparam.point[i].cx = sum_num / sum_pos;
+			guasscalparam.point[i].cy = i;
+			
+
+			//RadialCorrection
+			/*double x = (guasscalparam.point[i].cx - guasscalparam.uo) / guasscalparam.fx;
+			double y = (guasscalparam.point[i].cy - guasscalparam.vo) / guasscalparam.fy;
+			double rsqrt = x * x + y * y;
+			double rsqrts = rsqrt * rsqrt;
+			guasscalparam.point[i].cx = guasscalparam.uo + (x * (1 + guasscalparam.k1*rsqrt + guasscalparam.k2*rsqrts))*guasscalparam.fx;
+			guasscalparam.point[i].cy = guasscalparam.vo + (y * (1 + guasscalparam.k1*rsqrt + guasscalparam.k2*rsqrts))*guasscalparam.fy;*/
+
+			//TangentialCorrection
+			/*x = (guasscalparam.point[i].cx - guasscalparam.uo) / guasscalparam.fx;
+			y = (guasscalparam.point[i].cy - guasscalparam.vo) / guasscalparam.fy;
+			rsqrt = x * x + y * y;
+			guasscalparam.point[i].cx = (x + 2 * guasscalparam.p1*x*y + guasscalparam.p2 * (rsqrt + 2 * x*x))*guasscalparam.fx + guasscalparam.uo;
+			guasscalparam.point[i].cy = (y + guasscalparam.p1*(rsqrt + 2 * y*y) + 2 * guasscalparam.p2*x*y)*guasscalparam.fy + guasscalparam.vo;*/
+
+			guasscalparam.point[i].bright = gpoint[(int)guasscalparam.point[i].cx].brightness;
+
+			//guasscalparam.point[i].ay = atan((guasscalparam.vo - guasscalparam.point[i].cy) / guasscalparam.fy);
+			//guasscalparam.point[i].ay = asin(guasscalparam.ky*sin(atan((guasscalparam.vo - guasscalparam.point[i].cy)/ guasscalparam.fy)));
+
+			//double sDistance = guasscalparam.b*tan(guasscalparam.phi + atan((guasscalparam.uo - guasscalparam.point[i].cx) / guasscalparam.fx)) / cos(guasscalparam.point[i].ay);
+
+			//output the Raw Data  s: x  ay: y
+			double sDistance = guasscalparam.point[i].cx;
+			guasscalparam.point[i].ay = guasscalparam.point[i].cy;
+
+			if (guasscalparam.point[i].ay < -200 || guasscalparam.point[i].ay>2248)
+			{
+				guasscalparam.point[i].ay = 0;
+			}
+			guasscalparam.point[i].s = sDistance;
+			if (guasscalparam.point[i].s < 100 || guasscalparam.point[i].s >1700)
+			{
+				guasscalparam.point[i].s = 0;
+			}
+			//if (!isnan(guasscalparam.point[i].ay) && sDistance >= RangeMin && sDistance <= RangeMax&& guasscalparam.point[i].ay<AyMax && guasscalparam.point[i].ay>AyMin)
+			//{
+
+			//}			
+			//else 
+			//{
+				//guasscalparam.point[i].s = 0;
+				//guasscalparam.point[i].ay = 0;
+			//}
+
+
+
+			//guasscalparam.point[i].s = guasscalparam.b*tan(guasscalparam.phi + asin(guasscalparam.kx*sin(atan((guasscalparam.uo - guasscalparam.point[i].cx) / guasscalparam.fx)))) / cos(guasscalparam.point[i].ay);
+
+			//watch.stop();
+			//cout << "结果计算耗时:" << watch.elapsed() << endl;
+		}
+		else {
+			guasscalparam.point[i].cx = 0;
+			guasscalparam.point[i].ay = 0;
+			guasscalparam.point[i].bright = 0;
+			guasscalparam.point[i].ay = 0;
+			guasscalparam.point[i].s = 0;
+		}
+		guasscalparam.point[i].cy = i;
+		//printf("(%lf , %lf): %d)\n", guasscalparam.point[i].cx, guasscalparam.point[i].cy, guasscalparam.point[i].brightness);
+		delete[]gpoint;
+	}
+#endif
+
+
+#ifdef GAUSS_CENTER
 	//逐行存储所有点的x坐标和亮度值以便分析 在此只存入高斯点
 #pragma omp parallel for num_threads(guasscalparam.threads)
 	for (int i = 0; i < Rows; i++) {
@@ -333,6 +452,7 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 		//printf("(%lf , %lf): %d)\n", guasscalparam.point[i].cx, guasscalparam.point[i].cy, guasscalparam.point[i].brightness);
 		delete[]gpoint;
 	}
+#endif
 }
 
 //Automatical Identification for error base on the gate you can choose
