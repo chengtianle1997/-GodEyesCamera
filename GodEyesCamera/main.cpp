@@ -882,11 +882,6 @@ void AcqImageThread()
 						GetImage0 = 0;
 						CalEnd0 = 1;
 					}
-
-					
-					
-
-
 				}
 				else if (CalEnd1)
 				{
@@ -925,7 +920,7 @@ void AcqImageThread()
 
 				}
 			}
-			if (CameraType == 0&& method==1)
+			if (CameraType == 0 && method == 1)
 			{
 				//Analyze The photo
 				if ((Analyzingcounter < (encodeparam.FrameCut + 1)) && !AnalyzeEnd)
@@ -1738,13 +1733,15 @@ int main(int argc,char* argv[])
 		case 9:
 		{
 			//Designed for EncCam(Test)  Acq + Enc (Without Sending);
-			CalEnable = 1;
+			CalEnable = 0;
 			EncodeEnable = 1;
 			EnableSendData = 1;
 			//Image Transition
 			EnableCSSend = 0;
 			//Data Trasition
 			EnableDSSend = 0;
+			//All Images Encoded (Using VO or encode only option
+			CameraType = 1;
 		}
 		break;
 		case 10:

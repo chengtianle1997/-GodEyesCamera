@@ -158,7 +158,7 @@ bool AnalyzeEnd = false;
 bool CalAvrEnd = false;
 bool FindBeatEnable = false;
 
-//0: Calculate Camera  1: VO Camera
+//0: Calculate Camera (Encode and Calculate) 1: VO Camera or Encode Only Option
 int CameraType = 0;
 
 //Mjpeg TimeStamp Save
