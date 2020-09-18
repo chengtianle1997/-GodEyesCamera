@@ -158,8 +158,19 @@ bool AnalyzeEnd = false;
 bool CalAvrEnd = false;
 bool FindBeatEnable = false;
 
-//0: Calculate Camera (Encode and Calculate) 1: VO Camera or Encode Only Option
+//去水印采集图像
+bool UnableTimeStamp = false;
+
+// 0: Calculate Camera (Encode and Calculate) 1: VO Camera or Encode Only Option
 int CameraType = 0;
+// 选拍方式 1：找拍  2：图像分类  3：全计算模式
+int method = 2;
 
 //Mjpeg TimeStamp Save
 ofstream mjpegtimestamp;
+
+//Auto Exposure adjustment param
+BrightNess bright;
+int min_exp = 2000;
+int max_exp = 20000;
+int exp_step = 500;

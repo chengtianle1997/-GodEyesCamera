@@ -12,12 +12,11 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 typedef struct {
-
 	unsigned char SerialNumber[64]; 
 	int Framecnt;
 	float s[DataRows];
-	float ay[DataRows];
-
+	//float ay[DataRows];
+	float br[DataRows];
 }SocketPackage;
 
 typedef struct {
@@ -39,7 +38,7 @@ typedef struct {
 }ClientParam;
 
 typedef struct {
-	int StartUpPort = 8080;
+	int StartUpPort = 8100;
 	const char* ServerAddr = "127.0.0.1";
 }CsClientParam;
 

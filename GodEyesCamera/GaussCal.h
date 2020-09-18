@@ -27,7 +27,7 @@ typedef struct
 	double cy; //the row location
 	//double dx;
 	//double dy;
-	int bright; //The Greatest brightness in GaussFit
+	float bright; //The Greatest brightness in GaussFit
 	int Rows; //the total num of rows(only saved in point[0])
 	double s;
 	double ay;
@@ -86,6 +86,20 @@ typedef struct
 	MPoint *point; //input result of Cal
 }GaussManuIdenParam;
 
+// New for auto exposure adjust
+typedef struct
+{
+	// input
+	int threshold = 100;
+	Mat matImage;
+	int threads = 2;
+	// output
+	int* max_brightness;
+	int* max_num;
+	float best_rate;
+}BrightNess;
+
+
 class GaussCal {
 public:
 	GaussCal(void);
@@ -100,6 +114,8 @@ public:
 	void GaussManuIden(GaussManuIdenParam gaussmanuidenparam);
 
 	void GaussManuIdenInit();
+
+	void GetBrightness(BrightNess& bright);
 
 	
 protected:
@@ -135,8 +151,8 @@ private:
 
 	vector<Point> points;
 
-	int StartScan = 300;
-	int EndScan = 1400;
+	int StartScan = 600;
+	int EndScan = 1200;
 
 	double RangeMin = 1000;
 	double RangeMax = 10000;

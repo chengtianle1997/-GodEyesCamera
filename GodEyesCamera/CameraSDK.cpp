@@ -17,7 +17,7 @@ int Camera::GetDevList(CameraInitParam &camerainitparam)
 	{
 		for (unsigned int i = 0; i < stDevList.nDeviceNum; i++)
 		{
-			printf("[device %d]:\n", i);
+			//printf("[device %d]:\n", i);
 			//设备信息
 			MV_CC_DEVICE_INFO* pDeviceInfo = stDevList.pDeviceInfo[i];
 			if (NULL == pDeviceInfo)
@@ -26,14 +26,14 @@ int Camera::GetDevList(CameraInitParam &camerainitparam)
 				return -1;
 			}
 
-			PrintDeviceInfo(pDeviceInfo);
+			//PrintDeviceInfo(pDeviceInfo);
 
 			//int strl = 0;
 			//strl = strlen((const char*)camerainitparam.SerialNum);
 
 			//通过序列号查找相机
 			if (!strcmp((const char *)camerainitparam.SerialNum, (const char*)stDevList.pDeviceInfo[i]->SpecialInfo.stUsb3VInfo.chSerialNumber)) {
-				printf("%s Camera Launched\n", camerainitparam.SerialNum);
+				//printf("%s Camera Launched\n", camerainitparam.SerialNum);
 				camerainitparam.devNum = i;
 				GetCamera = true;
 			}
@@ -61,31 +61,31 @@ int Camera::OpenCamera(CameraInitParam &camerainitparam)
 {
 	if (camerainitparam.devNum >= stDevList.nDeviceNum)
 	{
-		printf("Input error!\n");
+		//printf("Input error!\n");
 		return -1;
 	}
 	//选择设备并创建句柄
 	nRet = MV_CC_CreateHandle(&handle, stDevList.pDeviceInfo[camerainitparam.devNum]);
 	if (MV_OK != nRet)
 	{
-		printf("Create Handle fail! nRet [0x%x]\n", nRet);
+		//printf("Create Handle fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	nRet = MV_CC_OpenDevice(handle);
 	if (MV_OK != nRet)
 	{
-		printf("Open Device fail! nRet [0x%x]\n", nRet);
+		//printf("Open Device fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	else {
-		printf("Device is ready!\n");
+		//printf("Device is ready!\n");
 	}
 
 	//设置触发模式为off
 	nRet = MV_CC_SetEnumValue(handle, "TriggerMode", 0);
 	if (MV_OK != nRet)
 	{
-		printf("Set Trigger Mode fail! nRet [0x%x]\n", nRet);
+		//printf("Set Trigger Mode fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 
@@ -95,7 +95,7 @@ int Camera::OpenCamera(CameraInitParam &camerainitparam)
 	nRet = MV_CC_GetIntValue(handle, "PayloadSize", &stParam);
 	if (MV_OK != nRet)
 	{
-		printf("Get PayloadSize fail! nRet [0x%x]\n", nRet);
+		//printf("Get PayloadSize fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	g_nPayloadSize = stParam.nCurValue;
@@ -106,7 +106,7 @@ int Camera::OpenCamera(CameraInitParam &camerainitparam)
 	nRet = MV_CC_GetIntValue(handle, "Width", &pIntValue);
 	if (MV_OK != nRet)
 	{
-		printf("Get Width fail! nRet [0x%x]\n", nRet);
+		//printf("Get Width fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	camerainitparam.in_w = pIntValue.nCurValue;
@@ -114,7 +114,7 @@ int Camera::OpenCamera(CameraInitParam &camerainitparam)
 	nRet = MV_CC_GetIntValue(handle, "Height", &pIntValue);
 	if (MV_OK != nRet)
 	{
-		printf("Get Height fail! nRet [0x%x]\n", nRet);
+		//printf("Get Height fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	camerainitparam.in_h = pIntValue.nCurValue;

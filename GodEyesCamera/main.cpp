@@ -24,6 +24,7 @@ int CameraInit(CameraInitParam &camerainitparam)
 	ret = camera.OpenCamera(camerainitparam);
 	if (ret)
 	{
+		printf("Camera %d Init Failed!\n\n", camerainitparam.DevPort);
 		return ret;
 	}
 
@@ -38,19 +39,32 @@ int CameraInit(CameraInitParam &camerainitparam)
 
 	//Get Device info
 	camera.GetDevInfo(camerainitparam.devNum, camerainitparam.DevInfo);
-	if (ret)
+	/*if (ret)
 	{
 		printf("Get DeviceInfo Failed");
-	}
+	}*/
 
 	//Set prop
 	//Set Exposureauto
-	ret = camera.SetExposureAuto(camerainitparam.ExposureAuto);
-	if (ret)
+	if (CameraType == 1)
 	{
-		return ret;
+		ret = camera.SetExposureAuto(camerainitparam.ExposureAuto);
+		if (ret)
+		{
+			return ret;
+		}
+		if (!camerainitparam.ExposureAuto)
+		{
+			//Set ExposureTime 
+			ret = camera.SetExposureTime(camerainitparam.ExposureTime);
+			if (ret)
+			{
+				return ret;
+			}
+		}
 	}
-	if (!camerainitparam.ExposureAuto)
+	
+	if (CameraType == 0)
 	{
 		//Set ExposureTime 
 		ret = camera.SetExposureTime(camerainitparam.ExposureTime);
@@ -59,8 +73,7 @@ int CameraInit(CameraInitParam &camerainitparam)
 			return ret;
 		}
 	}
-	
-	
+
 	//Set AcquisitionFrameRate
 	ret = camera.SetAcquisitionFrameRate(camerainitparam.AcquisitionFrameRate);
 	if (ret)
@@ -166,6 +179,8 @@ int CameraInit(CameraInitParam &camerainitparam)
 		return ret;
 	}
 
+	printf("Camera %d Lauched\n\n", camerainitparam.DevPort);
+
 	ImageWidth = camerainitparam.in_w;
 	ImageHeight = camerainitparam.in_h;
 	SizeofPixels = camerainitparam.in_w*camerainitparam.in_h;
@@ -235,7 +250,7 @@ void ClientInit()
 {
 	int ret;
 
-	printf("The Client is connecting.....\n");
+	//printf("The Client is connecting.....\n");
 
 	//int Serverport;
 
@@ -245,43 +260,43 @@ void ClientInit()
 
 	if (ret)
 	{
-		printf("Connecting failed!");
+		printf("Camera %d SocketServer Connection failed!\n\n", camerainitparam.DevPort);
 	}
 }
 
 void ClientClean() {
-	printf("Closing Socket......\n");
+	//printf("Closing Socket......\n");
 	client.ClientClose();
 }
 
 void CsClinetInit() {
 	int ret;
 
-	printf("The CsClient is connecting.....\n");
+	//printf("The CsClient is connecting.....\n");
 
 	//int Serverport;
 
 	Serverport = csclientparam.StartUpPort + camerainitparam.DevPort;
 
-	printf("ServerPort:%d\n", Serverport);
+	//printf("ServerPort:%d\n", Serverport);
 
 	ret = client.CsClientConnect(Serverport, csclientparam.ServerAddr);
 
 	if (ret)
 	{
-		printf("Cs Connecting failed!");
+		printf("Camera %d Web Image Sending failed!\n\n", camerainitparam.DevPort);
 	}
 }
 
 void CsClientClean() {
-	printf("Closing CsSocket......\n");
+	//printf("Closing CsSocket......\n");
 	client.CsClientClose();
 }
 
 void DsClientInit() {
 	int ret;
 
-	printf("The DsClient is connecting.....\n");
+	//printf("The DsClient is connecting.....\n");
 
 	//int Serverport;
 
@@ -291,12 +306,13 @@ void DsClientInit() {
 
 	if (ret)
 	{
-		printf("Ds Connecting failed!");
+		//printf("Ds Connecting failed!");
+		printf("Camera %d Web Data Sending failed!\n\n", camerainitparam.DevPort);
 	}
 }
 
 void DsClientClean() {
-	printf("Closing DsSocket......\n");
+	//printf("Closing DsSocket......\n");
 	client.DsClientClose();
 }
 
@@ -607,7 +623,8 @@ void CalImageThread()
 				for (int i = 0; i < ImageHeight; i++)
 				{
 					PackageData0.s[i] = Calparam.point[i].s;
-					PackageData0.ay[i] = Calparam.point[i].ay;
+					//PackageData0.ay[i] = Calparam.point[i].ay;
+					PackageData0.br[i] = Calparam.point[i].bright;
 				}
 
 				//outFile << PackageData0.SerialNumber << "," << PackageData0.Framecnt;
@@ -622,9 +639,6 @@ void CalImageThread()
 				client.ClientSend(buf, sizeof(SocketPackage));
 
 				free(buf);
-					
-
-
 				
 			}
 
@@ -644,7 +658,8 @@ void CalImageThread()
 					/*PackageData0.s[i] = Calparam.point[i*DataTrim].s;
 					PackageData0.ay[i] = Calparam.point[i*DataTrim].ay;*/
 					PackageData0.s[i] = Calparam.point[i].s;
-					PackageData0.ay[i] = Calparam.point[i].ay;
+					//PackageData0.ay[i] = Calparam.point[i].ay;
+					PackageData0.br[i] = Calparam.point[i].bright;
 				}
 
 				char* buf = (char*)malloc(sizeof(SocketPackage));
@@ -727,7 +742,8 @@ void CalImageThread()
 				for (int i = 0; i < ImageHeight; i++)
 				{
 					PackageData1.s[i] = Calparam.point[i].s;
-					PackageData1.ay[i] = Calparam.point[i].ay;
+					//PackageData1.ay[i] = Calparam.point[i].ay;
+					PackageData1.br[i] = Calparam.point[i].bright;
 				}
 
 				//outFile << PackageData1.SerialNumber << "," << PackageData1.Framecnt;
@@ -760,7 +776,8 @@ void CalImageThread()
 					/*PackageData0.s[i] = Calparam.point[i*DataTrim].s;
 					PackageData0.ay[i] = Calparam.point[i*DataTrim].ay;*/
 					PackageData1.s[i] = Calparam.point[i].s;
-					PackageData1.ay[i] = Calparam.point[i].ay;
+					//PackageData1.ay[i] = Calparam.point[i].ay;
+					PackageData1.br[i] = Calparam.point[i].bright;
 				}
 
 				char* buf = (char*)malloc(sizeof(SocketPackage));
@@ -795,9 +812,6 @@ void AcqImageThread()
 	CalEnd1 = 1;
 
 	int Framenum;
-
-	//选拍方式 1：找拍  2：图像分类
-	int method = 2;
 
 	//黑白图初始阈值
 	float sep = 10;
@@ -861,7 +875,7 @@ void AcqImageThread()
 					
 					if (EncodeEnable)
 					{
-						//时间戳标注
+						
 						Mat matImage{
 							cvSize(ImageWidth,ImageHeight),
 							CV_8UC1,
@@ -869,12 +883,18 @@ void AcqImageThread()
 						};
 						char* timestamp = new char[50];
 						sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer0Time.wYear, Buffer0Time.wMonth, Buffer0Time.wDay, Buffer0Time.wHour, Buffer0Time.wMinute, Buffer0Time.wSecond, Buffer0Time.wMilliseconds);
+
+						//时间戳标注
+						if (!UnableTimeStamp)
+						{
+							putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+						}
 						//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
 						int TimeinMilliSeconds = Buffer0Time.wHour * 60 * 60 * 1000 + Buffer0Time.wMinute * 60 * 1000 + Buffer0Time.wSecond * 1000 + Buffer0Time.wMilliseconds;
 						mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
 						EncodeRecordNum++;
 
-						putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+						
 						memcpy(Buffer0, matImage.data, SizeofPixels);
 
 						delete[]timestamp;
@@ -896,7 +916,6 @@ void AcqImageThread()
 					
 					if (EncodeEnable)
 					{
-						//时间戳标注
 						Mat matImage{
 							cvSize(ImageWidth,ImageHeight),
 							CV_8UC1,
@@ -905,11 +924,17 @@ void AcqImageThread()
 						char* timestamp = new char[50];
 						sprintf_s(timestamp, 50, "%d/%d/%d  %d:%d:%d:%d", Buffer1Time.wYear, Buffer1Time.wMonth, Buffer1Time.wDay, Buffer1Time.wHour, Buffer1Time.wMinute, Buffer1Time.wSecond, Buffer1Time.wMilliseconds);
 						//String timestamp = itoa(Buffer0Time.wYear) +"/" + Buffer0Time.wMonth + "/" + Buffer0Time.wDay + "   " + Buffer0Time.wHour + ":" + Buffer0Time.wMinute = ":" + Buffer0Time.wSecond + ":" + Buffer0Time.wMilliseconds;
+						
+						//时间戳标注
+						if (!UnableTimeStamp)
+						{
+							putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+						}
+
 						int TimeinMilliSeconds = Buffer1Time.wHour * 60 * 60 * 1000 + Buffer1Time.wMinute * 60 * 1000 + Buffer1Time.wSecond * 1000 + Buffer1Time.wMilliseconds;
 						mjpegtimestamp << EncodeRecordNum << "," << TimeinMilliSeconds << endl;
 						EncodeRecordNum++;
-
-						putText(matImage, timestamp, cv::Point(camerainitparam.in_w * 0.05, camerainitparam.in_w * 0.05), 1, 2.5, (255, 255, 255));
+	
 						memcpy(Buffer1, matImage.data, SizeofPixels);
 						delete[]timestamp;
 						CodeState1 = 1;
@@ -1009,7 +1034,7 @@ void AcqImageThread()
 				}
 			}
 			//Decide the Buffer 
-			if (method == 1)
+			if (CameraType == 0 && method == 1)
 			{
 				lock_guard<std::mutex> lockGuard(m);
 				if (CalEnd0)
@@ -1107,7 +1132,7 @@ void AcqImageThread()
 
 				}
 			}
-			else if (method == 2)
+			else if (CameraType == 0 && method == 2)
 			{
 				lock_guard<std::mutex> lockGuard(m);
 				if (CalEnd0)
@@ -1275,6 +1300,42 @@ void AcqImageThread()
 
 				}
 			}
+			else if (CameraType == 0 && method == 3)
+			{
+				lock_guard<std::mutex> lockGuard(m);
+				if (CalEnd0)
+				{
+					GetLocalTime(&Buffer0Time);
+					Buffer0Mutex = 1;
+					memcpy(Buffer0, (stOutFrame).pBufAddr, SizeofPixels);
+					Buffer0Mutex = 0;
+					Buffer0Info = stOutFrame.stFrameInfo;
+					DetectState0 = 1;
+					Framenum = stOutFrame.stFrameInfo.nFrameNum;
+					// calculate the center only
+					if (CalEnable) {
+						CalEnd0 = 0;
+						GetImage0 = 1;
+					}
+
+				}
+				else if (CalEnd1)
+				{
+					GetLocalTime(&Buffer1Time);
+					Buffer1Mutex = 1;
+					memcpy(Buffer1, (stOutFrame).pBufAddr, SizeofPixels);
+					Buffer1Mutex = 0;
+					Buffer1Info = stOutFrame.stFrameInfo;
+					DetectState1 = 1;
+					Framenum = stOutFrame.stFrameInfo.nFrameNum;
+					// calculate the center only				
+					if (CalEnable) {
+						CalEnd1 = 0;
+						GetImage1 = 1;
+					}
+
+				}
+			}
 		}
 		
 	}
@@ -1389,7 +1450,7 @@ void TimerPerformance()
 		if (watch.elapsed() > 1000000)
 		{
 			if (CalEnable&&!EncodeEnable) {
-				printf("The Calculate Framerate is %d fps\n", PerforFramecnt);
+				printf("Camera %d: The Calculate Framerate is %d fps\n\n", camerainitparam.DevPort, PerforFramecnt);
 				if (IsFirst)
 				{
 					//Record The FrameRate
@@ -1405,7 +1466,7 @@ void TimerPerformance()
 				
 			}
 			else if (!CalEnable&&EncodeEnable) {
-				printf("\n\n\n\nThe Encode Framerate is %d fps\n\n\n\n", PerforFrameenc);
+				printf("Camera %d: The Encode Framerate is %d fps\n\n", camerainitparam.DevPort, PerforFrameenc);
 				if (IsFirst)
 				{
 					//Record The FrameRate
@@ -1421,7 +1482,7 @@ void TimerPerformance()
 				
 			}
 			else if (CalEnable&&EncodeEnable) {
-				printf("\n\n\n\n\nThe Calculate Framerate is %d fps, \t The Encode Framerate is %d fps\n\n\n\n\n\n", PerforFramecnt,PerforFrameenc);
+				printf("Camera %d : The Calculate Framerate is %d fps, \t The Encode Framerate is %d fps\n\n", camerainitparam.DevPort, PerforFramecnt,PerforFrameenc);
 				if (IsFirst)
 				{
 
@@ -1474,7 +1535,7 @@ void DetectThread() {
 					{
 						//BeatRecord = ((BeatRecord - MaxCnt - 1) % (encodeparam.FrameCut + 1)+ (encodeparam.FrameCut + 1)*2 -5 )% (encodeparam.FrameCut + 1);
 						AnalyzeEnd = false;
-						printf("BeatRecord Change");
+						printf("Camera %d BeatRecord Change\n\n", camerainitparam.DevPort);
 						MaxCnt = Buffer0Info.nFrameNum;
 						//outFile << MaxCnt <<","<< BeatRecord <<endl;
 					}
@@ -1495,7 +1556,7 @@ void DetectThread() {
 					else if (Buffer1Info.nFrameNum < MaxCnt)
 					{
 						//BeatRecord = ((BeatRecord - MaxCnt - 1) % (encodeparam.FrameCut + 1) + (encodeparam.FrameCut + 1)*2-5 ) % (encodeparam.FrameCut + 1);
-						printf("BeatRecord Change");
+						printf("Camera %d BeatRecord Change\n\n", camerainitparam.DevPort);
 						AnalyzeEnd = false;
 						MaxCnt = Buffer1Info.nFrameNum;
 						//outFile << MaxCnt << "," << BeatRecord << endl;
@@ -1536,6 +1597,38 @@ void SendResToPort() {
 			free(buf);
 		}
 	}
+}
+
+// auto exposure adjustment
+int AutoExpAdjust()
+{
+	int ret;
+	float rate_threshold = 0.99;
+	// int step_num = int((max_exp - min_exp) / exp_step);
+	for (int m = min_exp; m <= max_exp; m += exp_step)
+	{
+		//Set ExposureTime 
+		ret = camera.SetExposureTime(m);
+		if (ret)
+		{
+			return ret;
+		}
+
+		MV_FRAME_OUT stOutFrame;
+		memset(&stOutFrame, 0, sizeof(MV_FRAME_OUT));
+		camera.GetImage(stOutFrame);
+		Mat matImage{
+			cvSize(ImageWidth,ImageHeight),
+			CV_8UC1,
+			(stOutFrame).pBufAddr
+		};
+		bright.matImage = matImage;
+		Gausscal.GetBrightness(bright);
+		printf("Camera%d: exp= %d, best_rate= %f\n\n", camerainitparam.DevPort, m, bright.best_rate);
+		if (bright.best_rate > rate_threshold)
+			return m;
+	}
+	return max_exp;
 }
 
 //程序停止指令监听
@@ -1737,11 +1830,13 @@ int main(int argc,char* argv[])
 			EncodeEnable = 1;
 			EnableSendData = 1;
 			//Image Transition
-			EnableCSSend = 0;
+			EnableCSSend = 1;
 			//Data Trasition
 			EnableDSSend = 0;
-			//All Images Encoded (Using VO or encode only option
+			//All Images Encoded (Using VO or encode only option)
 			CameraType = 1;
+			//去水印采集图像
+			UnableTimeStamp = true;
 		}
 		break;
 		case 10:
@@ -1765,6 +1860,7 @@ int main(int argc,char* argv[])
 			EnableSendData = 1;
 			//Data Trasition
 			EnableDSSend = 1;
+			method = 3;
 			//printf("Function:11\n");
 		}
 		break;
@@ -2045,8 +2141,14 @@ int main(int argc,char* argv[])
 	//camerainitparam.devNum = 0;
 	ret = CameraInit(camerainitparam);
 	if (ret) {
-		printf("Camera Init failed\n");
+		//printf("Camera Init failed\n");
 		return -1;
+	}
+
+	if (camerainitparam.ExposureAuto && CameraType == 0)
+	{
+		//auto exposure adjustment
+		AutoExpAdjust();
 	}
 	
 	encoderparam.in_w = camerainitparam.in_w;
@@ -2058,7 +2160,7 @@ int main(int argc,char* argv[])
 	ret = CreateFolder(FilePath, FinalPath, camerainitparam.SerialNum);
 	if (!ret)
 	{
-		printf("Create Folder Failed\n");
+		printf("Camera %d Create Folder Failed\n\n", camerainitparam.DevPort);
 	}
 	encoderparam.filepath = FinalPath;
 	encodeparam.filepath = FinalPath;
@@ -2176,20 +2278,20 @@ int main(int argc,char* argv[])
 	detecthread.join();
 
 	//SendClient.join();
-	printf("Stop Grabing……\n");
+	//printf("Camera %d: Stop Grabing……\n\n", camerainitparam.DevPort);
 	ret = CameraClean();
 	if (!ret) {
-		printf("Camera Clean failed\n");
+		printf("Camera %d Clean failed\n\n", camerainitparam.DevPort);
 	}
 	
 	if (Format == 0)
 	{
-		printf("Stop Encoding......\n");
+		//printf("Camera %d: Stop Encoding......\n\n", camerainitparam.DevPort);
 		EncoderMJPEGClean();
 	}
 	else if (Format == 1)
 	{
-		printf("Stop Encoding......\n");
+		//printf("Camera %d: Stop Encoding......\n\n", camerainitparam.DevPort);
 		EncoderJPEGClean();
 	}
 	if (EnableSendData) {
@@ -2218,7 +2320,8 @@ int main(int argc,char* argv[])
 
 	free(FinalPath);
 
-	printf("Application Accomplished!\n\n");
+	//printf("Application Accomplished!\n\n");
+	printf("Camera %d: Workload Finished\n\n", camerainitparam.DevPort);
 
 	return 0;
 }

@@ -213,7 +213,7 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 			guasscalparam.point[i].cx = (x + 2 * guasscalparam.p1*x*y + guasscalparam.p2 * (rsqrt + 2 * x*x))*guasscalparam.fx + guasscalparam.uo;
 			guasscalparam.point[i].cy = (y + guasscalparam.p1*(rsqrt + 2 * y*y) + 2 * guasscalparam.p2*x*y)*guasscalparam.fy + guasscalparam.vo;*/
 
-			guasscalparam.point[i].bright = gpoint[(int)guasscalparam.point[i].cx].brightness;
+			guasscalparam.point[i].bright = data[int(guasscalparam.point[i].cx)];
 
 			//guasscalparam.point[i].ay = atan((guasscalparam.vo - guasscalparam.point[i].cy) / guasscalparam.fy);
 			//guasscalparam.point[i].ay = asin(guasscalparam.ky*sin(atan((guasscalparam.vo - guasscalparam.point[i].cy)/ guasscalparam.fy)));
@@ -478,6 +478,45 @@ void GaussCal::GaussIdentify(GaussIdentifyParam gaussidentifyparam) {
 	imshow("GaussIdentify", gaussidentifyparam.matImage);
 	cvWaitKey(0);
 }
+
+//New for auto exposure adjust
+void GaussCal::GetBrightness(BrightNess& bright) {
+	Mat matc = bright.matImage.clone();
+	int Rows = matc.rows;
+	int Cols = matc.cols * matc.channels();
+
+	bright.max_brightness = new int[Rows];
+	bright.max_num = new int[Rows];
+
+	int best_num = 0;
+
+#pragma omp parallel for num_threads(bright.threads)
+	for (int i = 0; i < Rows; i++)
+	{
+		uchar* data = matc.ptr<uchar>(i);
+		int MaxPixel = data[StartScan];
+		int MaxCounter = 0;
+		for (int j = StartScan + 1; j < EndScan; j++)
+		{
+			if (data[j] > MaxPixel) {
+				MaxPixel = data[j];
+				MaxCounter = 0;
+			}
+			if (data[j] == MaxPixel)
+				MaxCounter++;
+		}
+		bright.max_brightness[i] = MaxPixel;
+		bright.max_num[i] = MaxCounter;
+		if (MaxPixel > bright.threshold)
+		{
+			best_num++;
+		}
+	}
+
+	bright.best_rate = float(best_num) / Rows;
+
+}
+
 
 int GaussCal::bound(short i, short a, short b)
 
