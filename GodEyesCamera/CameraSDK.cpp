@@ -207,13 +207,55 @@ int Camera::SetRegionSelector(int newRegionSelector)
 	return nRet;
 }
 
+//Restore max ROI
+int Camera::RestoreROI()
+{
+	// Get the maxnimum width and height of the camera
+	MVCC_INTVALUE* width_max = new MVCC_INTVALUE();
+    MVCC_INTVALUE *height_max = new MVCC_INTVALUE();
+	nRet = MV_CC_GetIntValue(handle, "WidthMax", width_max);
+	if (MV_OK != nRet)
+	{
+		printf("Get WidthMax fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_GetIntValue(handle, "HeightMax", height_max);
+	if (MV_OK != nRet)
+	{
+		printf("Get HeightMax fail! nRet [0x%x]\n", nRet);
+	}
+	// Set offset x and y to 0 first
+	nRet = MV_CC_SetIntValue(handle, "OffsetX", 0);
+	if (MV_OK != nRet)
+	{
+		printf("Set OffsetX to 0 fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_SetIntValue(handle, "OffsetY", 0);
+	if (MV_OK != nRet)
+	{
+		printf("Set OffsetY to 0 fail! nRet [0x%x]\n", nRet);
+	}
+	// Set width and height to the maxnimum
+	nRet = MV_CC_SetIntValue(handle, "Width", width_max->nCurValue);
+	if (MV_OK != nRet)
+	{
+		printf("Set Width to Max fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_SetIntValue(handle, "Height", height_max->nCurValue);
+	if (MV_OK != nRet)
+	{
+		printf("Set Height to Max fail! nRet [0x%x]\n", nRet);
+	}
+	delete width_max, height_max;
+	return nRet;
+}
+
 //Set Width
 int Camera::SetWidth(int newWidth)
 {
 	nRet = MV_CC_SetWidth(handle, newWidth);
 	if (MV_OK != nRet)
 	{
-		printf("Set ROIWidth fail! nRet [0x%x]\n", nRet);
+		printf("Set ROIWidth to fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	return nRet;
@@ -237,7 +279,7 @@ int Camera::SetOffsetX(int newOffsetX)
 	nRet = MV_CC_SetIntValue(handle, "OffsetX", newOffsetX);
 	if (MV_OK != nRet)
 	{
-		printf("Set ROIOffsetX fail! nRet [0x%x]\n", nRet);
+		printf("Set ROI OffsetX fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
 	return nRet;
@@ -249,9 +291,43 @@ int Camera::SetOffsetY(int newOffsetY)
 	nRet = MV_CC_SetIntValue(handle, "OffsetY", newOffsetY);
 	if (MV_OK != nRet)
 	{
-		printf("Set ROIOffsetY fail! nRet [0x%x]\n", nRet);
+		printf("Set ROI OffsetY fail! nRet [0x%x]\n", nRet);
 		return nRet;
 	}
+	return nRet;
+}
+
+int Camera::GetROISetting(CammeraROISetting *ROI_setting)
+{
+	MVCC_INTVALUE* width = new MVCC_INTVALUE();
+	MVCC_INTVALUE* height = new MVCC_INTVALUE();
+	MVCC_INTVALUE* offsetX = new MVCC_INTVALUE();
+	MVCC_INTVALUE* offsetY = new MVCC_INTVALUE();
+	nRet = MV_CC_GetIntValue(handle, "Width", width);
+	if (MV_OK != nRet)
+	{
+		printf("Get Width fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_GetIntValue(handle, "HeightMax", height);
+	if (MV_OK != nRet)
+	{
+		printf("Get Height fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_GetIntValue(handle, "OffsetX", offsetX);
+	if (MV_OK != nRet)
+	{
+		printf("Get OffsetX fail! nRet [0x%x]\n", nRet);
+	}
+	nRet = MV_CC_GetIntValue(handle, "OffsetY", offsetY);
+	if (MV_OK != nRet)
+	{
+		printf("Get OffsetY fail! nRet [0x%x]\n", nRet);
+	}
+	ROI_setting->Width = width->nCurValue;
+	ROI_setting->Height = height->nCurValue;
+	ROI_setting->OffsetX = offsetX->nCurValue;
+	ROI_setting->OffsetY = offsetY->nCurValue;
+	delete width, height, offsetX, offsetY;
 	return nRet;
 }
 

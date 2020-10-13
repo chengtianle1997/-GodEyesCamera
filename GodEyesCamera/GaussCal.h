@@ -50,6 +50,9 @@ typedef struct
 	int xRange = 15; //horizontal range base on the estimated center for Gausspoint selection
 	int threads = 2; //threads used in OpenMP for Calculation
 	
+	//input Offset X and Y for ROI
+	int offsetX = 0;
+	int offsetY = 0;
 
 	//The Physical Param Input(From Calib Result)
 	//double kx = 0.9558;

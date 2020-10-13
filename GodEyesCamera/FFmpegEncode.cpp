@@ -30,7 +30,6 @@ int Encoder::InitJPEG(EncoderParam encoderparam)
 	pCodecCtx->pix_fmt = AV_PIX_FMT_YUVJ444P;
 
 
-
 	pCodecCtx->width = in_w;
 
 	pCodecCtx->height = in_h;

@@ -47,6 +47,8 @@ CsClientParam csclientparam;
 
 DsClientParam dsclientparam;
 
+CammeraROISetting roi_setting;
+
 //State of occupation
 BOOL Buffer0Mutex = 0;
 BOOL Buffer1Mutex = 0;

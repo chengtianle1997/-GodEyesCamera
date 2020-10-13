@@ -42,6 +42,13 @@ typedef struct {
 
 }CameraInitParam;
 
+struct CammeraROISetting
+{
+	int Width;
+	int Height;
+	int OffsetX;
+	int OffsetY;
+};
 
 class Camera {
 public:
@@ -76,6 +83,9 @@ public:
 	//Set RegionSelector 
 	int SetRegionSelector(int newRegionSelector);
 
+	//Restore max ROI
+	int RestoreROI();
+
 	//Set Width
 	int SetWidth(int newWidth);
 
@@ -87,6 +97,9 @@ public:
 
 	//Set OffsetY
 	int SetOffsetY(int newOffsetY);
+
+	//Get the current ROI setting
+	int GetROISetting(CammeraROISetting* ROI_setting);
 
 	//Set FrameSpecInfoSelector
 	int SetFrameSpecInfoSelector(int newFrameSpecInfoSelector);

@@ -97,8 +97,13 @@ int CameraInit(CameraInitParam &camerainitparam)
 			return ret;
 		}
 	}
-	
-	
+
+	//Restore ROI settings
+	ret = camera.RestoreROI();
+	if (ret)
+	{
+		return ret;
+	}
 	//Set Width
 	ret = camera.SetWidth(camerainitparam.ROIWidth);
 	if (ret)
@@ -123,6 +128,15 @@ int CameraInit(CameraInitParam &camerainitparam)
 	{
 		return ret;
 	}
+	
+	//Check ROI Setting
+	ret = camera.GetROISetting(&roi_setting);
+	if (ret)
+	{
+		return ret;
+	}
+	printf("Camera %d Current ROI setting: W = %d, H = %d, X = %d, Y = %d\n\n", camerainitparam.DevPort, roi_setting.Width, roi_setting.Height, roi_setting.OffsetX, roi_setting.OffsetY);
+	
 	//Set FrameSpecInfoSelector
 	ret = camera.SetFrameSpecInfoSelector(camerainitparam.FrameSpecInfoSelector);
 	if (ret)
@@ -851,10 +865,18 @@ void AcqImageThread()
 	
 	int EncodeRecordNum = 1;
 
+	bool VerifyROIoffset = false;
+
 	while (!AcqExit) {
 
 		//stOutFrame = (MV_FRAME_OUT*)malloc(sizeof(MV_FRAME_OUT));
 		int ret = camera.GetImage(stOutFrame);
+		if (!VerifyROIoffset)
+		{
+			Calparam.offsetX = stOutFrame.stFrameInfo.nOffsetX;
+			Calparam.offsetY = stOutFrame.stFrameInfo.nOffsetY;
+			VerifyROIoffset = true;
+		}
 		if (ret == MV_OK) {
 			if (CameraType == 1)
 			{

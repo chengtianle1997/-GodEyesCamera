@@ -221,8 +221,8 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 			//double sDistance = guasscalparam.b*tan(guasscalparam.phi + atan((guasscalparam.uo - guasscalparam.point[i].cx) / guasscalparam.fx)) / cos(guasscalparam.point[i].ay);
 
 			//output the Raw Data  s: x  ay: y
-			double sDistance = guasscalparam.point[i].cx;
-			guasscalparam.point[i].ay = guasscalparam.point[i].cy;
+			double sDistance = guasscalparam.point[i].cx + guasscalparam.offsetX;
+			guasscalparam.point[i].ay = guasscalparam.point[i].cy + guasscalparam.offsetY;
 
 			if (guasscalparam.point[i].ay < -200 || guasscalparam.point[i].ay>2248)
 			{
@@ -257,7 +257,7 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 			guasscalparam.point[i].ay = 0;
 			guasscalparam.point[i].s = 0;
 		}
-		guasscalparam.point[i].cy = i;
+		guasscalparam.point[i].cy = i + guasscalparam.offsetY;
 		//printf("(%lf , %lf): %d)\n", guasscalparam.point[i].cx, guasscalparam.point[i].cy, guasscalparam.point[i].brightness);
 		delete[]gpoint;
 	}
@@ -406,8 +406,8 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 			//double sDistance = guasscalparam.b*tan(guasscalparam.phi + atan((guasscalparam.uo - guasscalparam.point[i].cx) / guasscalparam.fx)) / cos(guasscalparam.point[i].ay);
 
 			//output the Raw Data  s: x  ay: y
-			double sDistance = guasscalparam.point[i].cx;
-			guasscalparam.point[i].ay = guasscalparam.point[i].cy;
+			double sDistance = guasscalparam.point[i].cx + guasscalparam.offsetX;
+			guasscalparam.point[i].ay = guasscalparam.point[i].cy + guasscalparam.offsetY;
 
 			if (guasscalparam.point[i].ay < -200 || guasscalparam.point[i].ay>2248)
 			{
@@ -448,7 +448,7 @@ void GaussCal::GaussCenter(GaussCalParam &guasscalparam) {
 			guasscalparam.point[i].ay = 0;
 			guasscalparam.point[i].s = 0;
 		}
-		guasscalparam.point[i].cy = i;
+		guasscalparam.point[i].cy = i + guasscalparam.offsetY;
 		//printf("(%lf , %lf): %d)\n", guasscalparam.point[i].cx, guasscalparam.point[i].cy, guasscalparam.point[i].brightness);
 		delete[]gpoint;
 	}
